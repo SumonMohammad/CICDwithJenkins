@@ -1,0 +1,258 @@
+{
+	"info": {
+		"_postman_id": "f8789882-af1e-4ed6-a7ff-03bd6cd200a7",
+		"name": "NewManTest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29504816"
+	},
+	"item": [
+		{
+			"name": "SignIn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"const body = pm.response.text();\r",
+							"const bodydata = JSON.parse(body);\r",
+							"sessionToken = bodydata.data.session;\r",
+							"console.log(\"Session Token is: \" + sessionToken);\r",
+							"pm.environment.set(\"SignInSessionToken\", sessionToken);\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"code\": {\r",
+							"            \"type\": \"integer\"\r",
+							"        },\r",
+							"        \"data\": {\r",
+							"            \"type\": \"object\",\r",
+							"            \"properties\": {\r",
+							"                \"session\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                }\r",
+							"            },\r",
+							"            \"additionalProperties\": false,\r",
+							"            \"required\": [\r",
+							"                \"session\"\r",
+							"            ]\r",
+							"        }\r",
+							"    },\r",
+							"    \"additionalProperties\": false,\r",
+							"    \"required\": [\r",
+							"        \"code\",\r",
+							"        \"data\"\r",
+							"    ]\r",
+							"}\r",
+							"\r",
+							"pm.test('Validating Schema to give proper responses', () => {\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"})\r",
+							"\r",
+							"pm.test('The data object should have the required properties', () => {\r",
+							"    const responseData = bodydata.data;\r",
+							"    const sessionToken = responseData.session;\r",
+							"    var expectedSessionLenght = 32;\r",
+							"    pm.expect(responseData).to.be.an('object').that.has.property('session');\r",
+							"    pm.expect(sessionToken.length).to.be.greaterThan(0, 'Session token should not be empty');\r",
+							"    pm.expect(sessionToken.length).to.be.eq(expectedSessionLenght, `Expected Session lenght to be ${expectedSessionLenght} but found ${sessionToken.length}`);\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"Verify Response Body Data to include keys\", () => {\r",
+							"    const sessionTokenRegex = /^[0-9a-fA-F]{32}$/;\r",
+							"    pm.expect(bodydata.data).to.have.keys(['session']);\r",
+							"    pm.expect(bodydata.data.session).to.match(sessionTokenRegex);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"identifier\": \"{{devPhoneNumber}}\",\r\n    \"countryCode\": \"880\",\r\n    \"identifier_type\": \"phone\",\r\n    \"password\": \"{{devPassword}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{tvl_url}}/api/v1/auth/login",
+					"host": [
+						"{{tvl_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SignIn OTP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"const body = pm.response.text();\r",
+							"const bodydata = JSON.parse(body);\r",
+							"var accessToken = bodydata.data.access;\r",
+							"var refreshToken = bodydata.data.refresh;\r",
+							"var accessExpiredAt = bodydata.data.accessExpiredAt;\r",
+							"const regexPattern = /\\{\\s*\"code\"\\s*:\\s*\\d+\\s*,\\s*\"data\"\\s*:\\s*\\{\\s*\"refresh\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"access\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"accessExpiredAt\"\\s*:\\s*\"\\d+\"\\s*\\}\\s*\\}/;\r",
+							"\r",
+							"console.log(\"Sign In Access Token For Current Session is: \" + accessToken);\r",
+							"console.log(\"Refresh Token For Current Session is: \" + refreshToken);\r",
+							"pm.environment.set(\"SignInAccessToken\", accessToken);\r",
+							"pm.environment.set(\"RefreshToken\", refreshToken);\r",
+							"\r",
+							"//                       We Will Create Our Schema Method Here\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"code\": {\r",
+							"            \"type\": \"integer\"\r",
+							"        },\r",
+							"        \"data\": {\r",
+							"            \"type\": \"object\",\r",
+							"            \"properties\": {\r",
+							"                \"refresh\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                },\r",
+							"                \"access\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                },\r",
+							"                \"accessExpiredAt\": {\r",
+							"                    \"type\": \"string\"\r",
+							"                }\r",
+							"            },\r",
+							"            \"additionalProperties\": false,\r",
+							"            \"required\": [\r",
+							"                \"refresh\",\r",
+							"                \"access\",\r",
+							"                \"accessExpiredAt\"\r",
+							"            ]\r",
+							"        }\r",
+							"    },\r",
+							"    \"additionalProperties\": false,\r",
+							"    \"required\": [\r",
+							"        \"code\",\r",
+							"        \"data\"\r",
+							"    ]\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validating Schema To Give Proper Response\", () => {\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"//                       We Will Create Our Tests Here 🔽\r",
+							"\r",
+							"pm.test(\"Confirm Response Body Regex Pattern\", () => {\r",
+							"    var jsonRegex = /\\{\\s*\"code\"\\s*:\\s*\\d+\\s*,\\s*\"data\"\\s*:\\s*\\{\\s*\"refresh\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"access\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"accessExpiredAt\"\\s*:\\s*\"\\d+\"\\s*\\}\\s*\\}/;\r",
+							"    pm.expect(JSON.stringify(response)).to.match(jsonRegex)\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validating Response Body With Access Token\", () => {\r",
+							"    pm.expect(response.code).to.be.equal(0)\r",
+							"    pm.expect(response.data.access).to.eql(accessToken);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validating RefeshToken From API Response\", () => {\r",
+							"    pm.expect(response.code).to.be.equal(0);\r",
+							"    pm.expect(response.data.refresh).to.eql(refreshToken);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"API responds within the expected Time MS\", () => {\r",
+							"    const expectedTimeInMilliseconds = 800;\r",
+							"    pm.expect(pm.response.responseTime).to.be.lessThan(\r",
+							"        expectedTimeInMilliseconds + 1,\r",
+							"        `The endpoint did not respond within ${expectedTimeInMilliseconds} ms. Response came in ${pm.response.responseTime} ms`\r",
+							"    );\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Code is a non-negative integer\", function () {\r",
+							"    pm.expect(response.code).to.be.a('number').and.to.be.at.least(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Refresh token is a non-empty string\", function () {\r",
+							"    pm.expect(response).to.be.an('object');\r",
+							"    pm.expect(response.data.refresh).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Refresh token should not be empty\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Access token is a non-empty string\", function () {\r",
+							"    pm.expect(response).to.be.an('object');\r",
+							"    pm.expect(response.data.access).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Access token should not be empty\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains the required fields\", function () {\r",
+							"    pm.expect(response).to.have.property('code');\r",
+							"    pm.expect(response).to.have.property('data');\r",
+							"    pm.expect(response.data).to.have.property('refresh');\r",
+							"    pm.expect(response.data).to.have.property('access');\r",
+							"    pm.expect(response.data).to.have.property('accessExpiredAt');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Access token is stored in environment variable 'SignInAccessToken'\", function () {\r",
+							"\r",
+							"    pm.expect(response.data.access).to.exist;\r",
+							"    pm.expect(pm.environment.get(\"SignInAccessToken\")).to.equal(response.data.access);\r",
+							"\r",
+							"    pm.expect(response.data.refresh).to.exist;\r",
+							"    pm.expect(pm.environment.get(\"RefreshToken\")).to.equal(response.data.refresh);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Refresh token is stored in environment variable 'RefreshToken'\", function () {\r",
+							"    pm.expect(refreshToken).to.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i);\r",
+							"    pm.expect(accessToken).to.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i);\r",
+							"    pm.expect(accessExpiredAt).to.match(/^\\d+$/);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"{{devOTP}}\",\r\n    \"session\": \"{{SignInSessionToken}}\",\r\n    \"deviceInfo\": {\r\n        \"country\": \"BD\",\r\n        \"deviceModel\": \"M1 chip\",\r\n        \"deviceName\": \"TVL Macbook-pro\",\r\n        \"deviceId\": \"1f930014983c5e17d68df9c7f501cc49\",\r\n        \"platform\": \"ios\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{tvl_url}}/api/v1/auth/login/otp",
+					"host": [
+						"{{tvl_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login",
+						"otp"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
