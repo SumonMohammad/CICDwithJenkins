@@ -37,53 +37,7 @@
 							"const bodydata = JSON.parse(body);\r",
 							"sessionToken = bodydata.data.session;\r",
 							"console.log(\"Session Token is: \" + sessionToken);\r",
-							"pm.environment.set(\"SignInSessionToken\", sessionToken);\r",
-							"\r",
-							"const schema = {\r",
-							"    \"type\": \"object\",\r",
-							"    \"properties\": {\r",
-							"        \"code\": {\r",
-							"            \"type\": \"integer\"\r",
-							"        },\r",
-							"        \"data\": {\r",
-							"            \"type\": \"object\",\r",
-							"            \"properties\": {\r",
-							"                \"session\": {\r",
-							"                    \"type\": \"string\"\r",
-							"                }\r",
-							"            },\r",
-							"            \"additionalProperties\": false,\r",
-							"            \"required\": [\r",
-							"                \"session\"\r",
-							"            ]\r",
-							"        }\r",
-							"    },\r",
-							"    \"additionalProperties\": false,\r",
-							"    \"required\": [\r",
-							"        \"code\",\r",
-							"        \"data\"\r",
-							"    ]\r",
-							"}\r",
-							"\r",
-							"pm.test('Validating Schema to give proper responses', () => {\r",
-							"    pm.response.to.have.jsonSchema(schema);\r",
-							"})\r",
-							"\r",
-							"pm.test('The data object should have the required properties', () => {\r",
-							"    const responseData = bodydata.data;\r",
-							"    const sessionToken = responseData.session;\r",
-							"    var expectedSessionLenght = 32;\r",
-							"    pm.expect(responseData).to.be.an('object').that.has.property('session');\r",
-							"    pm.expect(sessionToken.length).to.be.greaterThan(0, 'Session token should not be empty');\r",
-							"    pm.expect(sessionToken.length).to.be.eq(expectedSessionLenght, `Expected Session lenght to be ${expectedSessionLenght} but found ${sessionToken.length}`);\r",
-							"})\r",
-							"\r",
-							"\r",
-							"pm.test(\"Verify Response Body Data to include keys\", () => {\r",
-							"    const sessionTokenRegex = /^[0-9a-fA-F]{32}$/;\r",
-							"    pm.expect(bodydata.data).to.have.keys(['session']);\r",
-							"    pm.expect(bodydata.data.session).to.match(sessionTokenRegex);\r",
-							"})"
+							"pm.environment.set(\"SignInSessionToken\", sessionToken);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -116,40 +70,7 @@
 				},
 				"description": "### Auth Login\n\nThis endpoint is used to authenticate and login a user.\n\n**HTTP Request**  \n`POST {{api_url}}/api/v1/auth/login`\n\n**Request Body**\n\n- `identifier` (text, required): The identifier of the user.\n- `countryCode` (text, required): The country code of the user's phone number.\n- `identifier_type` (text, required): The type of identifier used for login.\n- `password` (text, required): The user's password.\n    \n\n**Response**\n\n- Status: 200 OK\n- `code` (number): The status code of the response.\n- `data.session` (text): The session token for the authenticated user."
 			},
-			"response": [
-				{
-					"name": "Success",
-					"originalRequest": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"identifier\": \"1915628068\",\n    \"countryCode\": \"880\",\n    \"identifier_type\": \"phone\",\n    \"password\": \"0000\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{mockUrl}}/api/v1/auth/login",
-							"host": [
-								"{{mockUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"_postman_previewlanguage": null,
-					"header": null,
-					"cookie": [],
-					"body": null
-				}
-			]
+			"response": []
 		},
 		{
 			"name": "SingInOtp",
@@ -161,118 +82,11 @@
 							"const response = pm.response.json();\r",
 							"const body = pm.response.text();\r",
 							"const bodydata = JSON.parse(body);\r",
-							"var accessToken = bodydata.data.access;\r",
-							"var refreshToken = bodydata.data.refresh;\r",
-							"var accessExpiredAt = bodydata.data.accessExpiredAt;\r",
-							"const regexPattern = /\\{\\s*\"code\"\\s*:\\s*\\d+\\s*,\\s*\"data\"\\s*:\\s*\\{\\s*\"refresh\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"access\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"accessExpiredAt\"\\s*:\\s*\"\\d+\"\\s*\\}\\s*\\}/;\r",
-							"\r",
-							"console.log(\"Sign In Access Token For Current Session is: \" + accessToken);\r",
-							"console.log(\"Refresh Token For Current Session is: \" + refreshToken);\r",
-							"pm.environment.set(\"SignInAccessToken\", accessToken);\r",
-							"pm.environment.set(\"RefreshToken\", refreshToken);\r",
-							"\r",
-							"//                       We Will Create Our Schema Method Here\r",
-							"\r",
-							"const schema = {\r",
-							"    \"type\": \"object\",\r",
-							"    \"properties\": {\r",
-							"        \"code\": {\r",
-							"            \"type\": \"integer\"\r",
-							"        },\r",
-							"        \"data\": {\r",
-							"            \"type\": \"object\",\r",
-							"            \"properties\": {\r",
-							"                \"refresh\": {\r",
-							"                    \"type\": \"string\"\r",
-							"                },\r",
-							"                \"access\": {\r",
-							"                    \"type\": \"string\"\r",
-							"                },\r",
-							"                \"accessExpiredAt\": {\r",
-							"                    \"type\": \"string\"\r",
-							"                }\r",
-							"            },\r",
-							"            \"additionalProperties\": false,\r",
-							"            \"required\": [\r",
-							"                \"refresh\",\r",
-							"                \"access\",\r",
-							"                \"accessExpiredAt\"\r",
-							"            ]\r",
-							"        }\r",
-							"    },\r",
-							"    \"additionalProperties\": false,\r",
-							"    \"required\": [\r",
-							"        \"code\",\r",
-							"        \"data\"\r",
-							"    ]\r",
-							"}\r",
-							"\r",
-							"pm.test(\"Validating Schema To Give Proper Response\", () => {\r",
-							"    pm.response.to.have.jsonSchema(schema);\r",
-							"});\r",
-							"\r",
-							"//                       We Will Create Our Tests Here 🔽\r",
-							"\r",
-							"pm.test(\"Confirm Response Body Regex Pattern\", () => {\r",
-							"    var jsonRegex = /\\{\\s*\"code\"\\s*:\\s*\\d+\\s*,\\s*\"data\"\\s*:\\s*\\{\\s*\"refresh\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"access\"\\s*:\\s*\"[0-9a-fA-F]+\"\\s*,\\s*\"accessExpiredAt\"\\s*:\\s*\"\\d+\"\\s*\\}\\s*\\}/;\r",
-							"    pm.expect(JSON.stringify(response)).to.match(jsonRegex)\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Validating Response Body With Access Token\", () => {\r",
-							"    pm.expect(response.code).to.be.equal(0)\r",
-							"    pm.expect(response.data.access).to.eql(accessToken);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Validating RefeshToken From API Response\", () => {\r",
-							"    pm.expect(response.code).to.be.equal(0);\r",
-							"    pm.expect(response.data.refresh).to.eql(refreshToken);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"API responds within the expected Time MS\", () => {\r",
-							"    const expectedTimeInMilliseconds = 800;\r",
-							"    pm.expect(pm.response.responseTime).to.be.lessThan(\r",
-							"        expectedTimeInMilliseconds + 1,\r",
-							"        `The endpoint did not respond within ${expectedTimeInMilliseconds} ms. Response came in ${pm.response.responseTime} ms`\r",
-							"    );\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Code is a non-negative integer\", function () {\r",
-							"    pm.expect(response.code).to.be.a('number').and.to.be.at.least(0);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Refresh token is a non-empty string\", function () {\r",
-							"    pm.expect(response).to.be.an('object');\r",
-							"    pm.expect(response.data.refresh).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Refresh token should not be empty\");\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Access token is a non-empty string\", function () {\r",
-							"    pm.expect(response).to.be.an('object');\r",
-							"    pm.expect(response.data.access).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Access token should not be empty\");\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response body contains the required fields\", function () {\r",
-							"    pm.expect(response).to.have.property('code');\r",
-							"    pm.expect(response).to.have.property('data');\r",
-							"    pm.expect(response.data).to.have.property('refresh');\r",
-							"    pm.expect(response.data).to.have.property('access');\r",
-							"    pm.expect(response.data).to.have.property('accessExpiredAt');\r",
-							"});\r",
-							"\r",
-							"\r",
-							"pm.test(\"Access token is stored in environment variable 'SignInAccessToken'\", function () {\r",
-							"\r",
-							"    pm.expect(response.data.access).to.exist;\r",
-							"    pm.expect(pm.environment.get(\"SignInAccessToken\")).to.equal(response.data.access);\r",
-							"\r",
-							"    pm.expect(response.data.refresh).to.exist;\r",
-							"    pm.expect(pm.environment.get(\"RefreshToken\")).to.equal(response.data.refresh);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Refresh token is stored in environment variable 'RefreshToken'\", function () {\r",
-							"    pm.expect(refreshToken).to.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i);\r",
-							"    pm.expect(accessToken).to.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i);\r",
-							"    pm.expect(accessExpiredAt).to.match(/^\\d+$/);\r",
-							"});"
+							"refreshToken = bodydata.data.refresh;\r",
+							"var SignInAccessToken = bodydata.data.access;\r",
+							"console.log(\"Refresh Token is: \" + refreshToken);\r",
+							"pm.environment.set(\"SignInAccessToken\", SignInAccessToken);\r",
+							"console.log(\"access Token is: \" + SignInAccessToken);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -319,268 +133,46 @@
 			"response": []
 		},
 		{
-			"name": "GetUser",
+			"name": "ValidateToken",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const response = pm.response.json();",
-							"const body = pm.response.text();",
-							"const bodydata = JSON.parse(body);",
-							"",
-							"// Regular expression for URL validation",
-							"const linkRegex = /^(http|https):\\/\\/[^ \"]+$/;",
-							"",
-							"// Extract relevant data from the response",
-							"const {",
-							"    data: {",
-							"        id: userId,",
-							"        fullName,",
-							"        countryCode,",
-							"        phone: userPhone,",
-							"        email: userEmail,",
-							"        metaInfo,",
-							"        kycInfo: {",
-							"            nidInfo: {",
-							"                nidImageInfo: { frontImageUrl: nidFrontImageUrl, backImageUrl: nidBackImageUrl },",
-							"            },",
-							"            userFace: { userFaceUrl, userFacePath },",
-							"        }",
-							"    }",
-							"} = bodydata;",
-							"",
-							"let userMetaInfo = metaInfo[0] || {};",
-							"let { boType: userBoType } = userMetaInfo;",
-							"",
-							"// Environment variable handling",
-							"try {",
-							"    if (userId && userMetaInfo) {",
-							"        const { metaId: userMetaID, clientCode: userClientCode, boAccNo } = userMetaInfo;",
-							"",
-							"        pm.environment.set('UserId', userId);",
-							"        console.log(\"ID has been set as environment variable:\", userId);",
-							"",
-							"        pm.environment.set('UserMetaID', userMetaID);",
-							"        console.log(\"Meta ID has been set as environment variable:\", userMetaID);",
-							"",
-							"        pm.environment.set('UserClientCode', userClientCode);",
-							"        console.log(\"'User Client Code' has been set as environment variable:\", userClientCode);",
-							"",
-							"        pm.environment.set('devUserEmail', userEmail);",
-							"        console.log(\"Email has been set as environment variable:\", userEmail);",
-							"",
-							"        pm.environment.set('userBoAccountNo', boAccNo);",
-							"        console.log(\"'User BO Account No' has been set as environment variable:\", boAccNo);",
-							"    } else {",
-							"        console.log(\"No 'ID' field found in the response.\");",
-							"    }",
-							"} catch (error) {",
-							"    console.error(\"An error occurred:\", error.message);",
-							"}",
-							"",
-							"// Test for valid email format",
-							"pm.test('Email address should be in a valid format', () => {",
-							"    pm.expect(userEmail).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, 'Email address format is invalid');",
-							"});",
-							"",
-							"// Test for metaInfo presence and structure",
-							"pm.test('MetaInfo array is present and contains at least one element', () => {",
-							"    pm.expect(metaInfo).to.exist.and.to.be.an('array').that.is.not.empty;",
-							"});",
-							"",
-							"pm.test('MetaInfo array should contain boolean values for specified fields', () => {",
-							"    metaInfo.forEach(meta => {",
-							"        pm.expect(meta.didTrade).to.be.a('boolean');",
-							"        pm.expect(meta.didDeposit).to.be.a('boolean');",
-							"        pm.expect(meta.addLaterNominee1).to.be.a('boolean');",
-							"        pm.expect(meta.addLaterNominee2).to.be.a('boolean');",
-							"    });",
-							"});",
-							"",
-							"// Test for userFace within kycInfo",
-							"pm.test('UserFace object within kycInfo contains valid user face path or URL', () => {",
-							"    pm.expect(userFacePath).to.be.a('string').and.to.not.be.empty;",
-							"    pm.expect(userFaceUrl).to.be.a('string').and.to.not.be.empty;",
-							"});",
-							"",
-							"// Test for valid URLs",
-							"pm.test(\"Validating Links to be on valid 'WebLink' format\", () => {",
-							"    pm.expect(nidFrontImageUrl).to.match(linkRegex);",
-							"    pm.expect(nidBackImageUrl).to.match(linkRegex);",
-							"    pm.expect(userFaceUrl).to.match(linkRegex);",
-							"});",
-							"",
-							"// JSON schema validation",
-							"const schema = {",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"code\": { \"type\": \"integer\" },",
-							"        \"data\": {",
-							"            \"type\": \"object\",",
-							"            \"properties\": {",
-							"                \"id\": { \"type\": \"string\" },",
-							"                \"fullName\": { \"type\": \"string\" },",
-							"                \"countryCode\": { \"type\": \"string\" },",
-							"                \"phone\": { \"type\": \"string\" },",
-							"                \"email\": { \"type\": \"string\" },",
-							"                \"roleId\": { \"type\": \"string\" },",
-							"                \"metaInfo\": {",
-							"                    \"type\": \"array\",",
-							"                    \"items\": {",
-							"                        \"type\": \"object\",",
-							"                        \"properties\": {",
-							"                            \"metaId\": { \"type\": \"string\" },",
-							"                            \"boOption\": { \"type\": \"integer\" },",
-							"                            \"boType\": { \"type\": \"integer\" },",
-							"                            \"userIdHolder1\": { \"type\": \"string\" },",
-							"                            \"userIdHolder2\": { \"type\": \"string\" },",
-							"                            \"boAccNo\": { \"type\": \"string\" },",
-							"                            \"broker\": { \"type\": \"string\" },",
-							"                            \"residencyType\": { \"type\": \"integer\" },",
-							"                            \"boStatus\": { \"type\": \"integer\" },",
-							"                            \"fullNameHolder1\": { \"type\": \"string\" },",
-							"                            \"fullNameHolder2\": { \"type\": \"string\" },",
-							"                            \"didTrade\": { \"type\": \"boolean\" },",
-							"                            \"didDeposit\": { \"type\": \"boolean\" },",
-							"                            \"addLaterNominee1\": { \"type\": \"boolean\" },",
-							"                            \"addLaterNominee2\": { \"type\": \"boolean\" },",
-							"                            \"rejectionDetails\": {",
-							"                                \"type\": \"array\",",
-							"                                \"items\": {",
-							"                                    \"type\": \"object\",",
-							"                                    \"properties\": {",
-							"                                        \"holderType\": { \"type\": \"integer\" },",
-							"                                        \"rejectionReason\": { \"type\": \"integer\" },",
-							"                                        \"message\": { \"type\": \"string\" }",
-							"                                    },",
-							"                                    \"required\": [\"holderType\", \"rejectionReason\", \"message\"],",
-							"                                    \"additionalItems\": false,",
-							"                                    \"additionalProperties\": false",
-							"                                }",
-							"                            },",
-							"                            \"clientCode\": { \"type\": \"string\" },",
-							"                            \"isFlagged\": { \"type\": \"boolean\" },",
-							"                            \"boCreatedAt\": { \"type\": \"string\" }",
-							"                        },",
-							"                        \"required\": [",
-							"                            \"metaId\", \"boOption\", \"boType\", \"userIdHolder1\", \"userIdHolder2\",",
-							"                            \"boAccNo\", \"broker\", \"residencyType\", \"boStatus\", \"fullNameHolder1\",",
-							"                            \"fullNameHolder2\", \"didTrade\", \"didDeposit\", \"addLaterNominee1\",",
-							"                            \"addLaterNominee2\", \"rejectionDetails\", \"clientCode\", \"isFlagged\",",
-							"                            \"boCreatedAt\"",
-							"                        ],",
-							"                        \"additionalItems\": false,",
-							"                        \"additionalProperties\": false",
-							"                    }",
-							"                },",
-							"                \"kycInfo\": {",
-							"                    \"type\": \"object\",",
-							"                    \"properties\": {",
-							"                        \"nidInfo\": {",
-							"                            \"type\": \"object\",",
-							"                            \"properties\": {",
-							"                                \"nidBaseInfo\": {",
-							"                                    \"type\": \"object\",",
-							"                                    \"properties\": {",
-							"                                        \"nidNo\": { \"type\": \"string\" },",
-							"                                        \"fullName\": { \"type\": \"string\" },",
-							"                                        \"fatherOrHusbandName\": { \"type\": \"string\" },",
-							"                                        \"motherName\": { \"type\": \"string\" },",
-							"                                        \"DOB\": { \"type\": \"string\" },",
-							"                                        \"presentAddress\": { \"type\": \"string\" },",
-							"                                        \"permanentAddress\": { \"type\": \"string\" }",
-							"                                    },",
-							"                                    \"required\": [\"nidNo\", \"fullName\", \"fatherOrHusbandName\", \"motherName\", \"DOB\", \"presentAddress\", \"permanentAddress\"]",
-							"                                },",
-							"                                \"nidImageInfo\": {",
-							"                                    \"type\": \"object\",",
-							"                                    \"properties\": {",
-							"                                        \"frontImagePath\": { \"type\": \"string\" },",
-							"                                        \"backImagePath\": { \"type\": \"string\" },",
-							"                                        \"frontImageUrl\": { \"type\": \"string\" },",
-							"                                        \"backImageUrl\": { \"type\": \"string\" }",
-							"                                    },",
-							"                                    \"required\": [\"frontImagePath\", \"backImagePath\", \"frontImageUrl\", \"backImageUrl\"],",
-							"                                    \"additionalItems\": false,",
-							"                                    \"additionalProperties\": false",
-							"                                }",
-							"                            },",
-							"                            \"required\": [\"nidBaseInfo\", \"nidImageInfo\"],",
-							"                            \"additionalItems\": false,",
-							"                            \"additionalProperties\": false",
-							"                        },",
-							"                        \"passportInfo\": {",
-							"                            \"type\": \"object\",",
-							"                            \"properties\": {",
-							"                                \"passportImageInfo\": {",
-							"                                    \"type\": \"object\",",
-							"                                    \"properties\": {",
-							"                                        \"imagePath\": { \"type\": \"string\" },",
-							"                                        \"imageUrl\": { \"type\": \"string\" }",
-							"                                    },",
-							"                                    \"required\": [\"imagePath\", \"imageUrl\"]",
-							"                                }",
-							"                            },",
-							"                            \"required\": [\"passportImageInfo\"],",
-							"                            \"additionalItems\": false",
-							"                        },",
-							"                        \"userFace\": {",
-							"                            \"type\": \"object\",",
-							"                            \"properties\": {",
-							"                                \"userFacePath\": { \"type\": \"string\" },",
-							"                                \"userFaceUrl\": { \"type\": \"string\" }",
-							"                            },",
-							"                            \"required\": [\"userFacePath\", \"userFaceUrl\"]",
-							"                        }",
-							"                    },",
-							"                    \"required\": [\"nidInfo\", \"passportInfo\", \"userFace\"],",
-							"                    \"additionalItems\": false",
-							"                }",
-							"            },",
-							"            \"required\": [\"id\", \"fullName\", \"countryCode\", \"phone\", \"email\", \"roleId\", \"metaInfo\", \"kycInfo\"],",
-							"            \"additionalItems\": false",
-							"        },",
-							"        \"additionalProperties\": false",
-							"    },",
-							"    \"required\": [\"code\", \"data\"],",
-							"    \"additionalProperties\": false",
-							"};",
-							"",
-							"pm.test(\"Validating JSON With Schema\", () => {",
-							"    pm.response.to.have.jsonSchema(schema);",
-							"});",
-							"",
-							"// Conditional tests based on the presence of metaId",
-							"let hasMetaId = metaInfo.some(meta => meta.hasOwnProperty('metaId'));",
-							"",
-							"pm.test(\"Check for metaId in metaInfo\", () => {",
-							"    pm.expect(hasMetaId, \"metaId should be present in metaInfo\").to.be.true;",
-							"});",
-							"",
-							"if (hasMetaId) {",
-							"    pm.test(\"Further tests with metaId\", () => {",
-							"        pm.expect(userId).to.eql(pm.environment.get(\"UserId\"));",
-							"        pm.expect(userEmail).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, 'Email address format is invalid');",
-							"    });",
-							"} else {",
-							"    pm.test(\"metaId not found\", () => {",
-							"        pm.expect.fail(\"metaId is not present in metaInfo\");",
-							"    });",
-							"}",
-							"",
-							"// Validate BO Type and ensure MetaID is not unset for BO Types 1 or 2",
-							"pm.test(\"Validating BO Type and Unset MetaID for Joint Account\", () => {",
-							"    if (userBoType === 1 || userBoType === 2) {",
-							"        pm.expect(pm.environment.get(\"UserMetaId\")).to.exist;",
-							"    } else if (userBoType === 3) {",
-							"        pm.environment.unset(\"UserMetaId\");",
-							"    } else {",
-							"        console.log(\"Test\")",
-							"    }",
-							"});",
-							"",
-							""
+							"const response = pm.response.json();\r",
+							"const body = pm.response.text();\r",
+							"const bodydata = JSON.parse(body);\r",
+							"\r",
+							"var numericPattern = /^[-0-9]+$/;\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"code\": {\r",
+							"            \"type\": \"integer\"\r",
+							"        }\r",
+							"    },\r",
+							"    \"additionalProperties\": false,\r",
+							"    \"required\": [\r",
+							"        \"code\"\r",
+							"    ]\r",
+							"}\r",
+							"\r",
+							"pm.test('Validating Schema to give proper responses', () => {\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validating Token With Response Code 0\", () => {\r",
+							"    pm.expect(bodydata.code).to.be.equal(0);\r",
+							"    pm.expect(bodydata.code).to.be.a('number');\r",
+							"    pm.expect(bodydata).to.be.an('object');\r",
+							"    pm.expect(bodydata.code).to.exist;\r",
+							"    pm.expect(bodydata.code).to.match(numericPattern);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Check for any unexpected fields in the response\", function () {\r",
+							"    pm.expect(bodydata).to.be.an('object').that.does.not.include.any.keys('data');\r",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -597,21 +189,12 @@
 					}
 				}
 			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "access",
-						"value": "",
-						"disabled": true
-					}
-				],
+				"method": "POST",
+				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\n    \"access\": \"{{SignInAccessToken}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -619,7 +202,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{tvl_url}}/api/v1/auth/user?access={{SignInAccessToken}}&boStatus=UNKNOWN_BO_StatusType&includeMetaInfo=true&includePortfolioMeta=true&includeKycInfo=true",
+					"raw": "{{tvl_url}}/api/v1/auth/validate-access-token",
 					"host": [
 						"{{tvl_url}}"
 					],
@@ -627,50 +210,20 @@
 						"api",
 						"v1",
 						"auth",
-						"user"
-					],
-					"query": [
-						{
-							"key": "access",
-							"value": "{{SignInAccessToken}}",
-							"description": "Accessing the Signin Token."
-						},
-						{
-							"key": "boStatus",
-							"value": "UNKNOWN_BO_StatusType"
-						},
-						{
-							"key": "includeMetaInfo",
-							"value": "true"
-						},
-						{
-							"key": "includePortfolioMeta",
-							"value": "true"
-						},
-						{
-							"key": "includeKycInfo",
-							"value": "true"
-						}
+						"validate-access-token"
 					]
 				},
-				"description": "This API endpoint makes an HTTP GET request to retrieve user authentication information. The request includes parameters for access token, BO status type, and options to include meta information, portfolio meta, and KYC information.\n\nThe last execution of this request returned a 200 status code with a JSON response. The response includes a data object with user information such as ID, full name, country code, phone, email, role ID, meta information, and KYC information. The meta information includes details about the user's BO (Back Office) such as BO option, type, user IDs, account number, broker, residency type, status, full name holders, trade and deposit history, nominee details, rejection details, client code, and creation timestamp. The KYC information includes details about NID (National ID) and passport information, as well as user face details.\n\nPlease note that specific user data is intentionally masked for privacy."
+				"description": "This endpoint is used to validate an access token via an HTTP POST request to {{api_url}}/api/v1/auth/validate-access-token.\n\n### Request Body\n\n- access (text, required): The access token to be validated.\n    \n\n### Response\n\n- Status: 200 OK\n- code (number): Indicates the result of the access token validation. A code of 0 typically indicates a successful validation."
 			},
 			"response": [
 				{
-					"name": "Success",
+					"name": "success",
 					"originalRequest": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "access",
-								"value": "",
-								"type": "text",
-								"disabled": true
-							}
-						],
+						"method": "POST",
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "",
+							"raw": "{\n    \"access\": \"{{SignInAccessToken}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -678,7 +231,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{tvl_url}}/api/v1/auth/user?access={{SignInAccessToken}}&boStatus=UNKNOWN_BO_StatusType&includeMetaInfo=true&includePortfolioMeta=true&includeKycInfo=true",
+							"raw": "{{tvl_url}}/api/v1/auth/validate-access-token",
 							"host": [
 								"{{tvl_url}}"
 							],
@@ -686,114 +239,124 @@
 								"api",
 								"v1",
 								"auth",
-								"user"
-							],
-							"query": [
-								{
-									"key": "access",
-									"value": "{{SignInAccessToken}}",
-									"description": "Accessing the Signin Token."
-								},
-								{
-									"key": "boStatus",
-									"value": "UNKNOWN_BO_StatusType"
-								},
-								{
-									"key": "includeMetaInfo",
-									"value": "true"
-								},
-								{
-									"key": "includePortfolioMeta",
-									"value": "true"
-								},
-								{
-									"key": "includeKycInfo",
-									"value": "true"
-								}
+								"validate-access-token"
 							]
-						}
+						},
+						"description": "This endpoint is used to validate an access token via an HTTP POST request to {{api_url}}/api/v1/auth/validate-access-token.\n\n### Request Body\n\n- access (text, required): The access token to be validated.\n    \n\n### Response\n\n- Status: 200 OK\n- code (number): Indicates the result of the access token validation. A code of 0 typically indicates a successful validation."
 					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "application/json"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "server",
-							"value": "envoy"
-						},
-						{
-							"key": "x-envoy-upstream-service-time",
-							"value": "66"
-						},
-						{
-							"key": "grpc-status",
-							"value": "0"
-						},
-						{
-							"key": "grpc-message",
-							"value": ""
-						},
-						{
-							"key": "date",
-							"value": "Thu, 28 Dec 2023 18:16:49 GMT"
-						},
-						{
-							"key": "Content-Length",
-							"value": "4347"
-						},
-						{
-							"key": "x-goplug-go-version",
-							"value": "go1.17"
-						},
-						{
-							"key": "x-goplug-go-version",
-							"value": "go1.17"
-						},
-						{
-							"key": "Methods",
-							"value": "go1.17"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "Access-Control-Allow-Methods",
-							"value": "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-						},
-						{
-							"key": "Access-Control-Allow-Headers",
-							"value": "*"
-						},
-						{
-							"key": "Access-Control-Request-Headers",
-							"value": "*"
-						},
-						{
-							"key": "X-Kong-Upstream-Latency",
-							"value": "68"
-						},
-						{
-							"key": "X-Kong-Proxy-Latency",
-							"value": "5"
-						},
-						{
-							"key": "Via",
-							"value": "kong/2.7.2"
-						}
-					],
+					"_postman_previewlanguage": "",
+					"header": "",
 					"cookie": [],
-					"body": "{\n    \"code\": 0,\n    \"data\": {\n        \"id\": \"438\",\n        \"fullName\": \"MD. SUMON MIA\",\n        \"countryCode\": \"880\",\n        \"phone\": \"1888000002\",\n        \"email\": \"sumon@test1.com\",\n        \"roleId\": \"0\",\n        \"metaInfo\": [\n            {\n                \"metaId\": \"1257\",\n                \"boOption\": 2,\n                \"boType\": 1,\n                \"userIdHolder1\": \"438\",\n                \"userIdHolder2\": \"0\",\n                \"boAccNo\": \"1203980009876549\",\n                \"broker\": \"NBL Securities Ltd.\",\n                \"residencyType\": 1,\n                \"boStatus\": 6,\n                \"fullNameHolder1\": \"MD. SUMON MIA\",\n                \"fullNameHolder2\": \"\",\n                \"didTrade\": false,\n                \"didDeposit\": true,\n                \"addLaterNominee1\": true,\n                \"addLaterNominee2\": false,\n                \"rejectionDetails\": [\n                    {\n                        \"holderType\": 1,\n                        \"rejectionReason\": 1,\n                        \"message\": \"string\"\n                    }\n                ],\n                \"clientCode\": \"61257\",\n                \"isFlagged\": false,\n                \"boCreatedAt\": \"1700475218\"\n            }\n        ],\n        \"kycInfo\": {\n            \"nidInfo\": {\n                \"nidBaseInfo\": {\n                    \"nidNo\": \"9109638669\",\n                    \"fullName\": \"MD. SUMON MIA\",\n                    \"fatherOrHusbandName\": \"Md. Rabiul Islam\",\n                    \"motherName\": \"Sufia Begum\",\n                    \"DOB\": \"764553600.0\",\n                    \"presentAddress\": \"Home / Holding: Mandal house, Village / Road: , Mesta, Post Office: Hajipur-2000, Jamalpur Sadar, Jamalpur\",\n                    \"permanentAddress\": \"Home / Holding: Mandal house, Village / Road: , Mesta, Post Office: Hajipur-2000, Jamalpur Sadar, Jamalpur\"\n                },\n                \"nidImageInfo\": {\n                    \"frontImagePath\": \"stage/eKYC/NidFront-965cc290e4b8b3937813a411fac41216\",\n                    \"backImagePath\": \"stage/eKYC/NidBack-965cc290e4b8b3937813a411fac41216\",\n                    \"frontImageUrl\": \"https://storage.googleapis.com/stockx-user-documents/stage/eKYC/NidFront-965cc290e4b8b3937813a411fac41216?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=stockx-ocr%40stock-x-342909.iam.gserviceaccount.com%2F20231228%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20231228T181649Z&X-Goog-Expires=899&X-Goog-Signature=c81ef88204b83741eeed216dda89cd7de6ba2b3a242ebc429e3f3b6b4cce9f98b013c5d4ce4a5e1d5214a2c399a6f9d3ada6c9ad3d797ba60463616e641d80511ccd97b2169e35e540e92831da9d3d4439abec2e9237e69d80be6ba2b552593a9461b83358aef324a328313c123b9cc1f318df8dbc8a6849637605a71f3deb9d2c141d424cca968f5f6a45244923512f7b48f4c8de0e8ff114ae05812410c5520ac019be211eb42d158f5ffd149d25e4d4dcbdc9ae575fc30f05bb2ad1c4950273efe1491bd45a8e993b488254974393f88e5582ab1178a426dd1eea35f8796c543459602963913e08e22ffbd87e6559b5a74f869230f9b2b6f26df3f4c23135&X-Goog-SignedHeaders=host\",\n                    \"backImageUrl\": \"https://storage.googleapis.com/stockx-user-documents/stage/eKYC/NidBack-965cc290e4b8b3937813a411fac41216?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=stockx-ocr%40stock-x-342909.iam.gserviceaccount.com%2F20231228%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20231228T181649Z&X-Goog-Expires=899&X-Goog-Signature=4142f652d75d7688def6d577262b4566d81e230d7b38b87f8754a939065d43df85ee8558e88b425e2adf1fc277cf7464ca58e392b7c7297af997ee43bbabbf333c91fa49626bb68f9ae450b37b8c303da8b0da544f3f5b91061056691bff129d9937fb3b31b0e346b8e9a6e9523f9b9efd50561f22af3920cc171cebf7ffd47a2920fdceedea30ec1fd39923cf124dc8dd467385bffab0f0eed42468a7804dd5f3f5723eb5918ed113e3bd06356b410228740bc004768653b051c4e0ccd1e01154122bde8069d979c930659b21b5702cd69df6693f3db69f4f5392f4e05604d5d5c18b401df58ffee4552d4f589116192d2e81ef472665ea2c338b614601e5d0&X-Goog-SignedHeaders=host\"\n                }\n            },\n            \"passportInfo\": {\n                \"passportImageInfo\": {\n                    \"imagePath\": \"\",\n                    \"imageUrl\": \"\"\n                }\n            },\n            \"userFace\": {\n                \"userFacePath\": \"stage/eKYC/UserPhoto-965cc290e4b8b3937813a411fac41216\",\n                \"userFaceUrl\": \"https://storage.googleapis.com/stockx-user-documents/stage/eKYC/UserPhoto-965cc290e4b8b3937813a411fac41216?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=stockx-ocr%40stock-x-342909.iam.gserviceaccount.com%2F20231228%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20231228T181649Z&X-Goog-Expires=899&X-Goog-Signature=8b0546d5d34dd53a0ad49c96a32067ee86a26015ce23e312f93d7275162e664c326c7be7485dbfb5f9c5e930f45bb9da804bb82eb96e3127ab6957a0f5386d6e646a2698a6ae86103cc0228faa7f4b25548e8619e07d54d243b9a60c13777c49b967d40feb74a4cfb8711047a1ebb2dc2e4706e418e22d023c809e897c6f44115485ce0f7b17bc47eb793582796f787f2ed9a387e6c95449084fd132d7eb9bfe45b5d69ae05e92e3b56f2a9ac2e08673eb5b43e90bdac54d745a88fd5800a4b9c1c8ddfa5439328da422d0d939d81869d58ae89410dfe77bc205d5b442e5282ffef4496f59077aadec1df0748f3fe7bd4926b13ef3e00638d4730a03ea3bdfea&X-Goog-SignedHeaders=host\"\n            }\n        }\n    }\n}"
+					"body": ""
+				},
+				{
+					"name": "failed",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"access\": \"{{SignInAccessToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{tvl_url}}/api/v1/auth/validate-access-token",
+							"host": [
+								"{{tvl_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"validate-access-token"
+							]
+						},
+						"description": "This endpoint is used to validate an access token via an HTTP POST request to {{api_url}}/api/v1/auth/validate-access-token.\n\n### Request Body\n\n- access (text, required): The access token to be validated.\n    \n\n### Response\n\n- Status: 200 OK\n- code (number): Indicates the result of the access token validation. A code of 0 typically indicates a successful validation."
+					},
+					"_postman_previewlanguage": "",
+					"header": "",
+					"cookie": [],
+					"body": ""
 				}
 			]
+		},
+		{
+			"name": "SignOut",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"const body = pm.response.text();",
+							"const bodydata = JSON.parse(body);",
+							"",
+							"var numericPattern = /^[-0-9]+$/;",
+							"",
+							"const schema = {",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"code\": {",
+							"            \"type\": \"integer\"",
+							"        }",
+							"    },",
+							"    \"additionalProperties\": false,",
+							"    \"required\": [",
+							"        \"code\"",
+							"    ]",
+							"}",
+							"",
+							"pm.test('Validating Schema to give proper responses', () => {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"})",
+							"",
+							"pm.test(\"Validating Token With Response Code 0\", () => {",
+							"    pm.expect(bodydata.code).to.be.equal(0);",
+							"    pm.expect(bodydata.code).to.be.a('number');",
+							"    pm.expect(bodydata).to.be.an('object');",
+							"    pm.expect(bodydata.code).to.exist;",
+							"    pm.expect(bodydata.code).to.match(numericPattern);",
+							"});",
+							"",
+							"pm.test(\"Check for any unexpected fields in the response\", function () {",
+							"    pm.expect(bodydata).to.be.an('object').that.does.not.include.any.keys('data');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"access\" : \"{{SignInAccessToken}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{tvl_url}}/api/v1/auth/signout",
+					"host": [
+						"{{tvl_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"signout"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
