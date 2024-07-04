@@ -26,4 +26,4 @@ jobs:
 
     - name: Run Postman collection with Newman
       run: |
-        newman run NewmanTest.postman_collection.json -e practice_env.postman_environment.json
+        newman run NewmanTest.postman_collection.json -e Random_Dev_QA.postman_environment.json
